@@ -4,143 +4,18 @@ Create an **accessible form** that uses questions fetched from a REST endpoint. 
 
 ## Instructions
 
-### To get the repository running
-
-Download a copy of this repository.
-
-Go to the project directory and install dependencies.
-
-```shell
-$ npm install
-```
-
-Then start the development server.
-
-```shell
-$ npm start
-```
-
-This will start a simple Express app that will serve the contents of the [**./dist**](dist) directory where you will be placing your code.
-
-### 1) Fetch questions
-
-GET questions from the endpoint `https://putsreq.com/RWhI8ht10y5kqfmemrML`. The response will be:
-
-```json
-[
-  {
-    "id": "1111",
-    "label": "First Name",
-    "name": "nameFirst",
-    "type": "text",
-    "required": 1
-  },
-  {
-    "id": "2222",
-    "label": "Last Name",
-    "name": "nameLast",
-    "type": "text",
-    "required": 1
-  },
-  {
-    "id": "3333",
-    "label": "Your Phone Number",
-    "name": "contactPhone",
-    "type": "tel",
-    "pattern": "[0-9]{10}",
-    "required": 0
-  },
-  {
-    "id": "4444",
-    "label": "Your Email",
-    "name": "contactEmail",
-    "type": "email",
-    "required": 0
-  },
-  {
-    "id": "5555",
-    "legend": "Your preferred contact",
-    "name": "contactPreferred",
-    "type": "radio",
-    "required": 1,
-    "options": [
-      {
-        "id": "5555-1",
-        "label": "Phone",
-        "value": "phone"
-      },
-      {
-        "id": "5555-2",
-        "label": "Email",
-        "value": "email"
-      }
-    ]
-  }
-]
-```
-
-#### Schema
-
-* `id` The ID of the question’s input field.
-* `label/legend` The plaintext label/legend content for the question’s input field.
-* `name` The name of the question’s input field.
-* `type` The type of the question’s input field.
-* `pattern` The question’s validation pattern.
-* `required`  Boolean value. Whether the question’s input field is required or not.
-* `options`  The values of a radio or checkbox question’s fieldset.
-  * `id`  The ID of the option’s input field.
-  * `label`  The plaintext label content for the option’s input field.
-  * `value`  The value of the radio or checkbox.
-
-### 2) Render the form
-
-Build out the form using the JSON response. You may use a component framework or templating language of your choice for this portion.
-
-Use the [Constraint Validation API](https://developer.mozilla.org/en-US/docs/Learn/Forms/Form_validation#the_constraint_validation_api) to ensure the required fields collected are correct and their format is correct. Present the user with proper messaging based on the issue with their input.
-
-The form must be legible to screen readers. Proper ARIA labeling for invalid messaging needs to be used when the user blurs from an input or when they attempt to submit an invalid form.
-
-### 3) Create the submission handler
-
-POST form submissions to the same endpoint (`https://putsreq.com/RWhI8ht10y5kqfmemrML`). A stringified JSON object should be passed as the body of the request. **For the sake of this exercise**, any successful submission body `200` should match the following exactly otherwise it will return a client-side error `400`.
-
-```json
-[
-  {
-    "name": "nameFirst",
-    "value": "Jane"
-  },
-  {
-    "name": "nameLast",
-    "value": "Doe"
-  },
-  {
-    "name": "contactPhone",
-    "value": "9999999999"
-  },
-  {
-    "name": "contactEmail",
-    "value": "jd@email.com"
-  },
-  {
-    "name": "contactPreferred",
-    "value": "phone"
-  }
-]
-```
-
-### Back-end
-
-If you would like to see what the form service looks like on the back-end, you can browse a copy of the logic in the [**service.js**](service.js) file.
+Initial instructions can be found at the [@NYCOpportunity/front-end-assignment](https://github.com/NYCOpportunity/front-end-assignment) repository.
 
 ## Wrapping Up
 
-Create a new GitHub repository for the completed challenge to share. Include any additional instructions needed to run the application.
+* This example uses [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) and **async**/**await** to retrieve the questions from the form service as instructed by the assignment.
 
-#### Think about the following items and be prepared to discuss in our interview.
+* I chose to use the native web component framework [Tonic](https://tonicframework.dev/) to render the fields in the form. **This was one of the more challenging aspects that I would revisit given more time to increase my familiarity with the framework**. The labels are rendered above the input in a logical reading order for screen readers. Additionally, the radio question also uses the `<fieldset>` element to group the inputs along with the `<legend>` element as the label.
 
-* Assuming this service would be able to provide a session token or require authentication in a live environment, describe how would you ensure that the response sent to the backend service is properly authenticated.
+* Validation is done using the [Constraint Validation API](https://developer.mozilla.org/en-US/docs/Web/API/Constraint_validation) per the instructions. A blur event listener is added to the fields once they render within the Tonic fields component. If they do not pass validation a new node containing the validation message is added just before the question input with the `aria-live="polite"` attribute. The input has the `aria-invalid="true"` added along with the `aria-describedby` attribute that targets the message node's id.
 
-* Describe how you would ensure the form would not submit spam.
+* The submission handler checks the validity of the form and will not submit unless it passes. It uses the [FormData API](https://developer.mozilla.org/en-US/docs/Web/API/FormData) to collect the form data and create a stringified JSON body to `POST` to the form service. A new message node with the server response is added to the form to let users know wether the submission was successful or not. It also uses the `aria-live="polite"` attribute to announce itself to screen-readers.
 
-* Any other thoughts on improvements to this form outside of the direction given will be considered.
+* To secure this form in a production environment, an authentication service provided by the form service would be required. This would be in the form of oAuth or some other token that can be signed by the application and validated by the form service when a validated request is submitted to the service. Other options include session tokens or NONCEs rendered by the application on the server-side that can be placed in the HTML document when it's rendered and passed to a server-side proxy service in the application that submits the data to the form service.
+
+* To prevent spam I would add [Google reCAPTCHA](https://www.google.com/recaptcha/about/) to the form. This would require users to check a box to ensure they are not robots submitting the form.

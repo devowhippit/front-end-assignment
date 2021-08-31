@@ -3,7 +3,7 @@ import MyFields from './my-fields.js';
 
 (async () => {
   /**
-   * Renderer
+   * Fetch questions from service
    */
 
   const request = new Request('https://putsreq.com/RWhI8ht10y5kqfmemrML');
@@ -13,6 +13,10 @@ import MyFields from './my-fields.js';
   if (response.status === 200) {
     response = await response.json();
   }
+
+  /**
+   * Render Fields
+   */
 
   Tonic.add(MyFields);
 
